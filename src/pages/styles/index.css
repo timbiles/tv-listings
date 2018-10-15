@@ -6,3 +6,12 @@
 .home input {
     display: inline-block;
 }
+
+.home input:focus {
+    outline: none;
+}
+
+.home button:focus {
+    outline: none;
+}
+

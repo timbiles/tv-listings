@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Link } from 'gatsby'
 import axios from 'axios';
+import moment from 'moment';
 
 import Layout from '../components/layout'
 import './styles/index.css';
@@ -17,24 +18,25 @@ class Index extends Component {
 
   getListings(){
     axios.get(`http://api.tvmaze.com/search/shows?q=${this.state.show}`).then(res=> {
-      console.log(res.data[0].show)
       this.setState({info: res.data[0].show})
+    })
+  }
+
+  getShow(){
+    axios.get('http://api.tvmaze.com/shows/17128?embed=nextepisode').then(res=> {
+      console.log('Show info>>>', res.data)
     })
   }
 
   searchShow = () => {
     this.getListings()
+    this.getShow()
 
   }
 
   render(){
     console.log(this.state.info)
 const {info} = this.state
-// const map = info.length && info.show.map(e=> {
-//   return <div key={e.id}>
-//       <h4>{e.name}</h4>
-//   </div>
-// })
 
     return (
 
@@ -45,10 +47,21 @@ const {info} = this.state
         <h4>Search a show!</h4>
         <input type="text" onChange={e=>this.setState({show: e.target.value})}/>
         <button onClick={() => this.searchShow()}>Search!</button>
-          <div>
+            {
+              info.length !==0 &&
+            <div>
+
             <h4>{info.name}</h4>
-            <p>{info.type}</p>
+            <img src={info.image.medium} alt={info.name}/>            
+            <p>{info.network.name}</p>
+            {info.status === 'Ended' ?
+          <p>This show has ended.</p>
+          : info.length !==0 &&  
+          <p>{info.name} is on air {info.schedule.days[0]}'s at {moment.utc(info.schedule.time, ["h:mm A"]).format("LT")}</p>}
+          <p>{info.summary.replace(/<p>|<\/p>|<b>|<\/b>|<i>|<\/i>/gi, '')}</p>
           </div>
+          }
+            
 
     <Link to="/page-2/">Go to page 2</Link>
         </div>

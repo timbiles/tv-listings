@@ -1,6 +1,6 @@
 module.exports = {
   siteMetadata: {
-    title: 'Search TV-Listings',
+    title: 'TV Guide',
   },
   plugins: [
     'gatsby-plugin-react-helmet',
