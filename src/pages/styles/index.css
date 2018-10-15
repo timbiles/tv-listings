@@ -26,6 +26,10 @@
     box-shadow: 1px 1px 5px grey;
 }
 
+.show_info p {
+    margin: 1%;
+}
+
 .click {
     cursor: pointer;
 }
@@ -43,5 +47,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.bottom_btns {
+    display: flex;
+    justify-content: flex-start
 }
 

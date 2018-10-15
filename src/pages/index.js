@@ -11,38 +11,66 @@ class Index extends Component {
   state = {
     show: '',
     info: [],
-    sum: false
-  }
-
-  componentDidMount(){
-  }
-
-  getListings(){
-    axios.get(`http://api.tvmaze.com/search/shows?q=${this.state.show}`).then(res=> {
-      this.setState({info: res.data[0].show})
-    })
-  }
-
-  getShow(){
-    axios.get('http://api.tvmaze.com/shows/17128?embed=nextepisode').then(res=> {
-      console.log('Show info>>>', res.data)
-    })
-  }
-
-  nextEpisode(){
-    axios.get('http://api.tvmaze.com/shows/1/episodebynumber?season=3&number=4').then(res=> {
-      console.log('next episode', res.data)
-    })
+    sum: false,
+    episode: true,
+    content: [],
+    embed: [],
+    showID: '',
+    episodes: []
   }
 
   searchShow = () => {
     this.getListings()
-    this.getShow()
+    this.showAll()
+  }
+
+  async getListings(){
+    await axios.get(`http://api.tvmaze.com/search/shows?q=${this.state.show}`).then(res=> {
+      this.setState({info: res.data[0].show,showID: res.data[0].show.id}) 
+    })
+    await this.getShow();
+  }
+
+  getShow(){
+    const{showID} = this.state
+    axios.get(`http://api.tvmaze.com/shows/${showID}?embed=nextepisode`).then(res=> {
+      this.setState({embed: res.data._embedded.nextepisode})
+    })
+  }
+
+  nextEpisode(){
+    const { showID} = this.state
+    const {season, number} = this.state.embed
+    axios.get(`http://api.tvmaze.com/shows/${showID}/episodebynumber?season=${season}&number=${number}`).then(res=> {
+      console.log('next episode', res.data)
+      this.setState({content: res.data, episode: false})
+    })
+  }
+
+  prevEpisode(){
+    const {showID, episodes} = this.state
+
+    
+
+
+  }
+
+  showAll() {
+
+    axios.get('http://api.tvmaze.com/shows/17128/episodes').then(res=> {
+      let map = res.data.filter(e=> {
+        const d1 = new Date()
+        const d2 = new Date(e.airdate)
+        return d1.getTime() >= d2.getTime()
+      })
+      this.setState({episodes: map})
+    })
   }
 
   render(){
-    console.log(this.state.info)
-const {info, sum} = this.state
+    console.log(this.state)
+    console.log(Date())
+    const {info, sum, episode, content} = this.state
 
     return (
 
@@ -73,13 +101,34 @@ const {info, sum} = this.state
           }
           
           </div>
+          {episode ?
+          <div>
+
+            <div className='show_info'>
+            
+            <p>This is episode information</p>
+            </div>
+            <div className='show_btns'>
+              <p className='click' onClick={() => this.prevEpisode()}>Previous</p>
+              <p className='click' onClick={() => this.nextEpisode()}>Next</p>
+            </div>
+            
+            </div>
+          :
+          <div>
+
           <div className='show_info'>
-          <p>This is episode information</p>
+              <h4>{content.name}</h4>
+              <p>{moment.utc(content.airdate).format('MMM Do, YYYY')}</p>
+              <p>{moment.utc(content.airtime, ["h:mm A"]).format("LT")}</p>
+          </div>
           <div className='show_btns'>
-            <p className='click'>Previous</p>
-            <p className='click' onClick={() => this.nextEpisode()}>Next</p>
+            <p className='click' onClick={()=> this.prevEpisode()}>Previous</p>
+            <p className='click' onClick={() => this.nextEpisode()}>Next</p>            
           </div>
           </div>
+        }
+          
           </div>
           
           }
