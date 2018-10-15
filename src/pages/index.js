@@ -10,7 +10,8 @@ class Index extends Component {
 
   state = {
     show: '',
-    info: []
+    info: [],
+    sum: false
   }
 
   componentDidMount(){
@@ -28,15 +29,20 @@ class Index extends Component {
     })
   }
 
+  nextEpisode(){
+    axios.get('http://api.tvmaze.com/shows/1/episodebynumber?season=3&number=4').then(res=> {
+      console.log('next episode', res.data)
+    })
+  }
+
   searchShow = () => {
     this.getListings()
     this.getShow()
-
   }
 
   render(){
     console.log(this.state.info)
-const {info} = this.state
+const {info, sum} = this.state
 
     return (
 
@@ -49,7 +55,9 @@ const {info} = this.state
         <button onClick={() => this.searchShow()}>Search!</button>
             {
               info.length !==0 &&
-            <div>
+              <div className='show'>
+
+            <div className='show_info'>
 
             <h4>{info.name}</h4>
             <img src={info.image.medium} alt={info.name}/>            
@@ -58,12 +66,25 @@ const {info} = this.state
           <p>This show has ended.</p>
           : info.length !==0 &&  
           <p>{info.name} is on air {info.schedule.days[0]}'s at {moment.utc(info.schedule.time, ["h:mm A"]).format("LT")}</p>}
+          <p className='click' onClick={()=> this.setState({sum: !sum})}>Summary</p>
+          {
+            sum &&
           <p>{info.summary.replace(/<p>|<\/p>|<b>|<\/b>|<i>|<\/i>/gi, '')}</p>
+          }
+          
           </div>
+          <div className='show_info'>
+          <p>This is episode information</p>
+          <div className='show_btns'>
+            <p className='click'>Previous</p>
+            <p className='click' onClick={() => this.nextEpisode()}>Next</p>
+          </div>
+          </div>
+          </div>
+          
           }
             
 
-    <Link to="/page-2/">Go to page 2</Link>
         </div>
     
   </Layout>

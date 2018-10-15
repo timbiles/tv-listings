@@ -1,6 +1,8 @@
 .home {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .home input {
@@ -13,5 +15,33 @@
 
 .home button:focus {
     outline: none;
+}
+
+.show_info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2%;
+    padding: 2%;
+    box-shadow: 1px 1px 5px grey;
+}
+
+.click {
+    cursor: pointer;
+}
+
+.click:hover {
+    transform: scale(1.02);
+}
+
+.click:active {
+    transform: scale(.98);
+}
+
+.show_btns {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
