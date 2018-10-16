@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Link } from 'gatsby'
+// import { Link } from 'gatsby'
 import axios from 'axios';
 import moment from 'moment';
 
@@ -10,67 +10,67 @@ class Index extends Component {
 
   state = {
     show: '',
-    info: [],
-    sum: false,
-    episode: true,
-    content: [],
-    embed: [],
+    index: '',
     showID: '',
-    episodes: []
+    info: [],
+    next: [],
+    prev: [],
+    episodes: [],
+    episode: true,
+    sum: false,
+    initial: false
   }
 
-  searchShow = () => {
-    this.getListings()
-    this.showAll()
+  searchShow = async () => {
+    await this.getListings()
+    await this.showAll()
   }
 
-  async getListings(){
+ async getListings(){
     await axios.get(`http://api.tvmaze.com/search/shows?q=${this.state.show}`).then(res=> {
-      this.setState({info: res.data[0].show,showID: res.data[0].show.id}) 
+      this.setState({info: res.data[0].show, showID: res.data[0].show.id}) 
     })
-    await this.getShow();
-  }
-
-  getShow(){
-    const{showID} = this.state
-    axios.get(`http://api.tvmaze.com/shows/${showID}?embed=nextepisode`).then(res=> {
+    await axios.get(`http://api.tvmaze.com/shows/${this.state.showID}?embed=nextepisode`).then(res=> {
       this.setState({embed: res.data._embedded.nextepisode})
     })
   }
 
-  nextEpisode(){
-    const { showID} = this.state
-    const {season, number} = this.state.embed
-    axios.get(`http://api.tvmaze.com/shows/${showID}/episodebynumber?season=${season}&number=${number}`).then(res=> {
-      console.log('next episode', res.data)
-      this.setState({content: res.data, episode: false})
-    })
-  }
-
-  prevEpisode(){
-    const {showID, episodes} = this.state
-
+  async showAll() {
+    const {showID} = this.state
     
-
-
+    await axios.get(`http://api.tvmaze.com/shows/${showID}/episodes`).then(res=> {
+      this.setState({episodes: res.data})
+    })
+    await this.findEpisodes()
+    
   }
 
-  showAll() {
-
-    axios.get('http://api.tvmaze.com/shows/17128/episodes').then(res=> {
-      let map = res.data.filter(e=> {
-        const d1 = new Date()
-        const d2 = new Date(e.airdate)
-        return d1.getTime() >= d2.getTime()
-      })
-      this.setState({episodes: map})
+  findEpisodes(){
+    const {showID, episodes} = this.state
+    const {season, number} = this.state.embed
+     axios.get(`http://api.tvmaze.com/shows/${showID}/episodebynumber?season=${season}&number=${number}`).then(res=> {
+      let find = episodes.findIndex(e => e.id === res.data.id)
+      this.setState({ index: find})
     })
+  }
+
+  nextEpisode = () => {
+    const { index, initial} = this.state
+
+   !initial 
+    ? this.setState({index: index, initial: true, episode: false})
+    : this.setState({index: index+1})
+  }
+
+  prevEpisode = () => {
+    const { index } = this.state
+
+    this.setState({index: index-1, episode: false})
+  
   }
 
   render(){
-    console.log(this.state)
-    console.log(Date())
-    const {info, sum, episode, content} = this.state
+    const {info, sum, episode, episodes, index} = this.state
 
     return (
 
@@ -118,9 +118,9 @@ class Index extends Component {
           <div>
 
           <div className='show_info'>
-              <h4>{content.name}</h4>
-              <p>{moment.utc(content.airdate).format('MMM Do, YYYY')}</p>
-              <p>{moment.utc(content.airtime, ["h:mm A"]).format("LT")}</p>
+              <h4>{episodes[index].name}</h4>
+              <p>{moment.utc(episodes[index].airdate).format('MMM Do, YYYY')}</p>
+              <p>{moment.utc(episodes[index].airtime, ["h:mm A"]).format("LT")}</p>
           </div>
           <div className='show_btns'>
             <p className='click' onClick={()=> this.prevEpisode()}>Previous</p>
